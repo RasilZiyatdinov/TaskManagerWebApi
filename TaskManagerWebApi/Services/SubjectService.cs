@@ -2,7 +2,8 @@
 using TaskManagerApi.DAL;
 using TaskManagerApi.Entities;
 using TaskManagerApi.Models;
-using TaskManagerApi.Services.Interfaces;
+using TaskManagerWebApi.Models.DTO;
+using TaskManagerWebApi.Services.Interfaces;
 
 namespace TaskManagerWebApi.Services
 {
@@ -16,7 +17,7 @@ namespace TaskManagerWebApi.Services
             logger = _logger;
         }
 
-        public async Task<Subject> AddSubjectAsync(SubjectModel subject)
+        public async Task AddSubjectAsync(SubjectModel subject)
         {
             var groups = await dbContext.Group.Where(x => subject.GroupsIds.Contains(x.Id)).ToListAsync();
             var teacher = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == subject.TeacherId);
@@ -28,8 +29,6 @@ namespace TaskManagerWebApi.Services
             });
             await dbContext.SaveChangesAsync();
             //logger.LogInformation("Преподаватель добавил новую дисциплину \'{Name}\': {@user}", subject.Name, user);
-            return subj.Entity;
-
         }
 
         public async Task<bool> DeleteSubjectAsync(int id)
@@ -41,7 +40,7 @@ namespace TaskManagerWebApi.Services
             return deleteResult != null ? true : false;
         }
 
-        public async Task<Subject> UpdateSubjectAsync(SubjectModel subjectmodel)
+        public async Task UpdateSubjectAsync(SubjectModel subjectmodel)
         {
             var subject = await dbContext.Subject.Include(x => x.Groups).FirstOrDefaultAsync(x => x.Id == subjectmodel.Id);
             var groups = await dbContext.Group.Where(x => subjectmodel.GroupsIds.Contains(x.Id)).ToListAsync();
@@ -51,30 +50,23 @@ namespace TaskManagerWebApi.Services
             var updateResult = dbContext.Subject.Update(subject);
             await dbContext.SaveChangesAsync();
             //logger.LogInformation("Преподаватель обновил дисциплину \'{Name}\': {@user}", subject.Name, user);
-            return updateResult.Entity;
         }
 
-        public async Task<IEnumerable<SubjectModel>> GetSubjectByTeacherAsync(int id)
+        public async Task<IEnumerable<SubjectDTO>> GetSubjectByTeacherAsync(int id)
         {
-            var subjectList = await dbContext.Subject.Include(x => x.Groups).Where(x => x.TeacherId == id).ToListAsync();
-            List<SubjectModel> list = new List<SubjectModel>();
+            var subjectList = await dbContext.Subject.Include(x => x.Groups).Include(x => x.Teacher).Where(x => x.TeacherId == id).ToListAsync();
+            List<SubjectDTO> list = new List<SubjectDTO>();
             foreach (var item in subjectList)
             {
-                list.Add(new SubjectModel
+                list.Add(new SubjectDTO
                 {
                     Id = item.Id,
                     Name = item.Name,
-                    TeacherId = item.TeacherId,
-                    GroupsIds = item.Groups.Select(x => x.Id).ToList(),
+                    Teacher = new UserModel(item.Teacher, null),
+                    Groups = item.Groups,
                 });
             }
             return list;
-        }
-
-        public async Task<Subject> GetSubjectByIdAsync(int id)
-        {
-            var subject = await dbContext.Subject.FirstOrDefaultAsync(x => x.Id == id);
-            return subject;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskManagerApi.DAL;
 using TaskManagerApi.Entities;
-using TaskManagerApi.Services.Interfaces;
+using TaskManagerWebApi.Services.Interfaces;
 
 namespace TaskManagerApi.Services
 {

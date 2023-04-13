@@ -12,11 +12,10 @@ namespace TaskManagerApi.Models
         public string Role { get; set; }
         public string? Group { get; set; }
 
-
         public AuthenticateResponse(User user, string role, string token)
         {
             Id = user.Id;
-            FullName = user.UserName;            
+            FullName = user.FullName;            
             Email = user.Email;
             Group = user.Group?.Name;
             Role = role;

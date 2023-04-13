@@ -12,8 +12,8 @@ using TaskManagerApi.DAL;
 namespace TaskManagerWebApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230221184006_InitNew")]
-    partial class InitNew
+    [Migration("20230327143419_qweqwejklsf")]
+    partial class qweqwejklsf
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,6 +21,9 @@ namespace TaskManagerWebApi.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.3")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -210,21 +213,6 @@ namespace TaskManagerWebApi.Migrations
                     b.ToTable("ProjectTeamRole");
                 });
 
-            modelBuilder.Entity("ProjectUser", b =>
-                {
-                    b.Property<int>("ParticipantsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ParticipantsId", "ProjectsId");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("ProjectUser");
-                });
-
             modelBuilder.Entity("TaskManagerApi.Entities.Group", b =>
                 {
                     b.Property<int>("Id")
@@ -257,6 +245,33 @@ namespace TaskManagerWebApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Priority");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Наивысший"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Высокий"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Средний"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Низкий"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Самый низкий"
+                        });
                 });
 
             modelBuilder.Entity("TaskManagerApi.Entities.Project", b =>
@@ -266,6 +281,9 @@ namespace TaskManagerWebApi.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("Date");
 
                     b.Property<int?>("ManagerId")
                         .HasColumnType("integer");
@@ -277,12 +295,17 @@ namespace TaskManagerWebApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("StatusId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("SubjectId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ManagerId");
+
+                    b.HasIndex("StatusId");
 
                     b.HasIndex("SubjectId");
 
@@ -304,6 +327,33 @@ namespace TaskManagerWebApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Status");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Открыта"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "В работе"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Решена"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Переоткрыта"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Закрыта"
+                        });
                 });
 
             modelBuilder.Entity("TaskManagerApi.Entities.Subject", b =>
@@ -343,8 +393,8 @@ namespace TaskManagerWebApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Hours")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("Date");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -353,14 +403,24 @@ namespace TaskManagerWebApi.Migrations
                     b.Property<int>("PriorityId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("StatusId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TeamRoleId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PriorityId");
 
+                    b.HasIndex("ProjectId");
+
                     b.HasIndex("StatusId");
+
+                    b.HasIndex("TeamRoleId");
 
                     b.ToTable("Task");
                 });
@@ -380,6 +440,28 @@ namespace TaskManagerWebApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TeamRole");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Разработчик"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Аналитик"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Архитектор"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Дизайнер"
+                        });
                 });
 
             modelBuilder.Entity("TaskManagerApi.Entities.User", b =>
@@ -403,6 +485,10 @@ namespace TaskManagerWebApi.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int?>("GroupId")
                         .HasColumnType("integer");
@@ -452,6 +538,86 @@ namespace TaskManagerWebApi.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("User", "AspNetIdentity");
+                });
+
+            modelBuilder.Entity("TaskManagerWebApi.Entities.RequestStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RequestStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Принято"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Запрошено"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Отклонено"
+                        });
+                });
+
+            modelBuilder.Entity("TaskManagerWebApi.Entities.StudentProject", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProjectId", "StudentId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("StatusId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("StudentProject", (string)null);
+                });
+
+            modelBuilder.Entity("TaskManagerWebApi.Entities.StudentTask", b =>
+                {
+                    b.Property<int>("TaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("HoursNumber")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TaskId", "StudentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("StudentTask", (string)null);
                 });
 
             modelBuilder.Entity("GroupSubject", b =>
@@ -535,26 +701,17 @@ namespace TaskManagerWebApi.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProjectUser", b =>
-                {
-                    b.HasOne("TaskManagerApi.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("ParticipantsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaskManagerApi.Entities.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TaskManagerApi.Entities.Project", b =>
                 {
                     b.HasOne("TaskManagerApi.Entities.User", "Manager")
                         .WithMany("ManagedProjects")
                         .HasForeignKey("ManagerId");
+
+                    b.HasOne("TaskManagerApi.Entities.Status", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TaskManagerApi.Entities.Subject", "Subject")
                         .WithMany()
@@ -563,6 +720,8 @@ namespace TaskManagerWebApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Manager");
+
+                    b.Navigation("Status");
 
                     b.Navigation("Subject");
                 });
@@ -586,15 +745,31 @@ namespace TaskManagerWebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TaskManagerApi.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TaskManagerApi.Entities.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TaskManagerApi.Entities.TeamRole", "TeamRole")
+                        .WithMany()
+                        .HasForeignKey("TeamRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Priority");
 
+                    b.Navigation("Project");
+
                     b.Navigation("Status");
+
+                    b.Navigation("TeamRole");
                 });
 
             modelBuilder.Entity("TaskManagerApi.Entities.User", b =>
@@ -606,14 +781,82 @@ namespace TaskManagerWebApi.Migrations
                     b.Navigation("Group");
                 });
 
+            modelBuilder.Entity("TaskManagerWebApi.Entities.StudentProject", b =>
+                {
+                    b.HasOne("TaskManagerApi.Entities.Project", "Project")
+                        .WithMany("Requests")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaskManagerWebApi.Entities.RequestStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaskManagerApi.Entities.User", "Student")
+                        .WithMany("Requests")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("Status");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("TaskManagerWebApi.Entities.StudentTask", b =>
+                {
+                    b.HasOne("TaskManagerApi.Entities.User", "Student")
+                        .WithMany("StudentTasks")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaskManagerApi.Entities.TaskEntity", "Task")
+                        .WithMany("StudentTasks")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Task");
+                });
+
             modelBuilder.Entity("TaskManagerApi.Entities.Group", b =>
                 {
                     b.Navigation("Students");
                 });
 
+            modelBuilder.Entity("TaskManagerApi.Entities.Project", b =>
+                {
+                    b.Navigation("Requests");
+                });
+
+            modelBuilder.Entity("TaskManagerApi.Entities.TaskEntity", b =>
+                {
+                    b.Navigation("StudentTasks");
+                });
+
             modelBuilder.Entity("TaskManagerApi.Entities.User", b =>
                 {
                     b.Navigation("ManagedProjects");
+
+                    b.Navigation("Requests");
+
+                    b.Navigation("StudentTasks");
 
                     b.Navigation("Subjects");
                 });

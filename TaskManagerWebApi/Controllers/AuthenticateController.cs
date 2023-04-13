@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +13,14 @@ using TaskManagerApi.DAL;
 using TaskManagerApi.Entities;
 using TaskManagerApi.Models;
 using TaskManagerApi.Services;
-using TaskManagerApi.Services.Interfaces;
 using TaskManagerWebApi.Models;
+using TaskManagerWebApi.Services.Interfaces;
 
 namespace TaskManager.Controllers
 {
+    /// <summary>
+    /// Авторизация и аутентификация
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class AuthenticateController : ControllerBase
@@ -25,6 +30,13 @@ namespace TaskManager.Controllers
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly IJwtService _jwtService;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userService"></param>
+        /// <param name="userManager"></param>
+        /// <param name="roleManager"></param>
+        /// <param name="jwtService"></param>
         public AuthenticateController(IUserService userService, UserManager<User> userManager,
             RoleManager<IdentityRole<int>> roleManager, IJwtService jwtService)
         {
@@ -45,6 +57,10 @@ namespace TaskManager.Controllers
         {
             var response = await _userService.Authenticate(model);
 
+            Response.Cookies.Append("X-Access-Token", response.Token, new CookieOptions() { HttpOnly = true, SameSite = SameSiteMode.Strict });
+            Response.Cookies.Append("X-Email", response.Email, new CookieOptions() { HttpOnly = true, SameSite = SameSiteMode.Strict });
+            //Response.Cookies.Append("X-Refresh-Token", user.RefreshToken, new CookieOptions() { HttpOnly = true, SameSite = SameSiteMode.Strict });
+
             return Ok(response);
         }
 
@@ -57,12 +73,16 @@ namespace TaskManager.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var response = await _userService.Register(model, Request, Url);
-            
+            var response = await _userService.Register(model, Request, Url);            
             return Ok(response);
         }
 
-
+        /// <summary>
+        /// Подтверждение email (переход по ссылке)
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
@@ -118,18 +138,26 @@ namespace TaskManager.Controllers
             {
                 return BadRequest(new { message = "An error occurred while resetting your password. Please try again later."});
             }
-
-            return Ok();
+            return Ok(result);
         }
 
 
-
+        /// <summary>
+        /// Получить пользователя по токену
+        /// </summary>
+        /// <returns></returns>
         [Authorize]
         [HttpGet("getuser")]
         public async Task<IActionResult> GetCurrentUser()
         {
             var user = await _jwtService.GetUserByToken(HttpContext);
             return user == null ? NotFound() : Ok(user);
+        }
+
+        [HttpGet("getroles")]
+        public async Task<IActionResult> GetRoles()
+        {
+            return Ok(_userService.GetRoles());
         }
     }
 }

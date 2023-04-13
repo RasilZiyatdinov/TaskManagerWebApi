@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using TaskManagerApi.Entities;
 using TaskManagerApi.Models;
 using TaskManagerApi.Services;
-using TaskManagerApi.Services.Interfaces;
+using TaskManagerWebApi.Models;
+using TaskManagerWebApi.Services.Interfaces;
 
 namespace TaskManagerApi.Controllers
 {
@@ -11,13 +12,14 @@ namespace TaskManagerApi.Controllers
     [ApiController]
     public class ProjectController : ControllerBase
     {
-        private readonly IProjectService projectService;
+        private readonly IProjectService projectService; 
         private readonly IJwtService jwtService;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="projectService"></param>
+        /// <param name="_projectService"></param>
+        /// <param name="_jwtService"></param>
         public ProjectController(IProjectService _projectService, IJwtService _jwtService)
         {
             projectService = _projectService;
@@ -30,105 +32,66 @@ namespace TaskManagerApi.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("getbyteacher")]
-        public async Task<IActionResult> Get(int teacherId)
+        public async Task<IActionResult> Get(int id)
         {
-            var response = await projectService.GetProjectsByTeacherAsync(teacherId);
+            var response = await projectService.GetProjectsByTeacherAsync(id);
             return Ok(response);
         }
 
+
         /// <summary>
-        /// Добавить новый проект
+        /// Получить проекты по группе
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("getbygroup")]
+        public async Task<IActionResult> GetByGroup(int id)
+        {
+            var response = await projectService.GetProjectsByGroupAsync(id);
+            return Ok(response);
+        }
+
+
+
+        /// <summary>
+        /// Добавить новый проект - "Преподаватель"
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
         [HttpPost("add")]
-        public async Task<IActionResult> Post(Project p)
+        public async Task<IActionResult> Post(ProjectModel p)
         {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var response = await projectService.AddProjectAsync(p, user);
-            return Ok(response);
+            UserModel user = await jwtService.GetUserByToken(HttpContext);
+            await projectService.AddProjectAsync(p, user);
+            return Ok();
         }
 
         /// <summary>
-        /// Обновить проект
+        /// Обновить проект - "Преподаватель"
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
         [HttpPut("update")]
-        public async Task<IActionResult> Update(Project p)
+        public async Task<IActionResult> Update(ProjectModel p)
         {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var updateResult = await projectService.UpdateProjectAsync(p);
-            return Ok(updateResult);
+            UserModel user = await jwtService.GetUserByToken(HttpContext);
+            await projectService.UpdateProjectAsync(p);
+            return Ok();
         }
 
         /// <summary>
-        /// Удалить проект
+        /// Удалить проект - "Преподаватель"
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var response = projectService.DeleteProjectAsync(id, user);
-            return Ok(response);
-
-        }
-
-        /// <summary>
-        /// Выбор проекта менеджером
-        /// </summary>
-        /// <param name="managerId"></param>
-        /// <param name="projectId"></param>
-        /// <returns></returns>
-        [HttpPost("addmanager")]
-        public async Task<IActionResult> PostManager(int managerId, int projectId)
-        {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var response = await projectService.ChooseProjectByManagerAsync(managerId, projectId, user);
+            UserModel user = await jwtService.GetUserByToken(HttpContext);
+            var response = await projectService.DeleteProjectAsync(id, user);
             return Ok(response);
         }
 
-        /// <summary>
-        /// Выбор проекта студентом
-        /// </summary>
-        /// <param name="studentId"></param>
-        /// <param name="projectId"></param>
-        /// <returns></returns>
-        [HttpPost("addstudent")]
-        public async Task<IActionResult> PostStudent(int studentId, int projectId)
-        {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var response = await projectService.ChooseProjectByStudentAsync(studentId, projectId, user);
-            return Ok(response);
-        }
-
-        /// <summary>
-        /// Покинуть проект (менеджер)
-        /// </summary>
-        /// <param name="projectId"></param>
-        /// <returns></returns>
-        [HttpDelete("deletemanager")]
-        public async Task<IActionResult> DeleteManager(int projectId)
-        {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var response = await projectService.LeaveProjectByManagerAsync(projectId, user);
-            return Ok(response);
-        }
-
-        /// <summary>
-        /// Покинуть проект (студент)
-        /// </summary>
-        /// <param name="studentId"></param>
-        /// <param name="projectId"></param>
-        /// <returns></returns>
-        [HttpDelete("deletestudent")]
-        public async Task<IActionResult> DeleteStudent(int studentId, int projectId)
-        {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var response = await projectService.LeaveProjectByStudentAsync(studentId, projectId, user);
-            return Ok(response);
-        }
+       
     }
 }

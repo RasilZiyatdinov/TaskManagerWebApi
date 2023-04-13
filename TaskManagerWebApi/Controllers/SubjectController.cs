@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using TaskManagerApi.Entities;
 using TaskManagerApi.Models;
 using TaskManagerApi.Services;
-using TaskManagerApi.Services.Interfaces;
+using TaskManagerWebApi.Services.Interfaces;
 
 namespace TaskManagerApi.Controllers
 {
-    [Authorize(Roles = "Преподаватель")]
+    //[Authorize(Roles = "Преподаватель")]
     [Route("[controller]")]
     [ApiController]
     public class SubjectController : ControllerBase
@@ -20,7 +20,9 @@ namespace TaskManagerApi.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="subjectService"></param>
+        /// <param name="_subjectService"></param>
+        /// <param name="_jwtService"></param>
+        /// <param name="_logger"></param>
         public SubjectController(ISubjectService _subjectService, IJwtService _jwtService, ILogger<SubjectController> _logger)
         {
             subjectService = _subjectService;
@@ -36,46 +38,46 @@ namespace TaskManagerApi.Controllers
         [HttpGet("getbyteacher")]
         public async Task<IActionResult> GetByTeacher(int id)
         {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
+            //UserModel user = await jwtService.GetUserByToken(HttpContext);
             var response = await subjectService.GetSubjectByTeacherAsync(id);
             return Ok(response);
         }
 
         /// <summary>
-        /// Добавить новую дисциплину
+        /// Добавить новую дисциплину - "Преподаватель"
         /// </summary>
         /// <param name="subject"></param>
         /// <returns></returns>
         [HttpPost("add")]
         public async Task<IActionResult> Post(SubjectModel subject)
         {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var response = await subjectService.AddSubjectAsync(subject);
-            return Ok(response);
+            UserModel user = await jwtService.GetUserByToken(HttpContext);
+            await subjectService.AddSubjectAsync(subject);
+            return Ok();
         }
 
         /// <summary>
-        /// Обновить дисциплину
+        /// Обновить дисциплину - "Преподаватель"
         /// </summary>
         /// <param name="subject"></param>
         /// <returns></returns>
         [HttpPut("update")]
         public async Task<IActionResult> Put(SubjectModel subject)
         {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
-            var response = await subjectService.UpdateSubjectAsync(subject);
-            return Ok(response);
+            UserModel user = await jwtService.GetUserByToken(HttpContext);
+            await subjectService.UpdateSubjectAsync(subject);
+            return Ok();
         }
 
         /// <summary>
-        /// Удалить дисциплину
+        /// Удалить дисциплину - "Преподаватель"
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
+            //UserModelResponse user = await jwtService.GetUserByToken(HttpContext);
             var response = await subjectService.DeleteSubjectAsync(id);
             return Ok(response);
         }

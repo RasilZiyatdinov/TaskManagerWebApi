@@ -1,6 +1,5 @@
 ﻿using TaskManagerApi.DAL;
 using TaskManagerApi.Models;
-using TaskManagerApi.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -18,6 +17,8 @@ using TaskManagerWebApi.Models;
 using Org.BouncyCastle.Asn1.Ocsp;
 using TaskManagerApi.Helpers;
 using Microsoft.EntityFrameworkCore;
+using TaskManagerWebApi.Services.Interfaces;
+using TaskManagerWebApi.Models.DTO;
 
 namespace TaskManagerApi.Services
 {
@@ -26,20 +27,15 @@ namespace TaskManagerApi.Services
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly IConfiguration _configuration;
-        ApplicationDbContext _context;
 
-        //private Logger _logger = LogManager.GetCurrentClassLogger();
         private static ILogger<UserService> logger;
-        public UserService(UserManager<User> userManager,
-            RoleManager<IdentityRole<int>> roleManager,
-            IConfiguration configuration,
-            ILogger<UserService> _logger)
+        public UserService(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, 
+            IConfiguration configuration, ILogger<UserService> _logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
         }
-
         public async Task<AuthenticateResponse> Authenticate(LoginModel model)
         {
             var user = await _userManager.Users.Include(x => x.Group).FirstOrDefaultAsync(x => x.Email == model.Email);
@@ -51,17 +47,17 @@ namespace TaskManagerApi.Services
                 throw new AppException("Email or password is incorrect");
             }
 
-            if (!user.EmailConfirmed)
-            {
-                throw new AppException("Email is not verified");
-            }
+            //if (!user.EmailConfirmed)
+            //{
+            //    throw new AppException("Email is not verified");
+            //}
 
             var userRoles = await _userManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
                 {
                     new Claim("id", user.Id.ToString()),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Name, user.FullName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                     //new Claim(ClaimTypes.Role, user.Role.Name)
                 };
@@ -74,7 +70,6 @@ namespace TaskManagerApi.Services
             var token = GetToken(authClaims);
             return new AuthenticateResponse(user, userRoles.ElementAt(0), new JwtSecurityTokenHandler().WriteToken(token));
         }
-
         public async Task<Response> Register(RegisterModel model, HttpRequest request, IUrlHelper url)
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
@@ -89,9 +84,10 @@ namespace TaskManagerApi.Services
                 {
                     Email = model.Email,
                     SecurityStamp = Guid.NewGuid().ToString(),
-                    UserName = model.FullName,
+                    FullName = model.FullName,
                     GroupId = model.GroupId,
-                    EmailConfirmed = false
+                    EmailConfirmed = false,
+                    UserName = model.Email
                 };
             }
             else
@@ -100,8 +96,9 @@ namespace TaskManagerApi.Services
                 {
                     Email = model.Email,
                     SecurityStamp = Guid.NewGuid().ToString(),
-                    UserName = model.FullName,
-                    EmailConfirmed = false
+                    FullName = model.FullName,
+                    EmailConfirmed = false,
+                    UserName = model.Email
                 };
             }
 
@@ -125,7 +122,6 @@ namespace TaskManagerApi.Services
 
             return new Response { Status = "Success", Message = "User created successfully" };
         }
-
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
@@ -140,7 +136,6 @@ namespace TaskManagerApi.Services
 
             return token;
         }
-
         public async Task RequestPasswordReset(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -153,7 +148,6 @@ namespace TaskManagerApi.Services
 
             //logger.LogWarning("Reset password requested for an account that did not exist.");
         }
-
         public async Task RequestPasswordResetLink(User user)
         {
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -171,8 +165,6 @@ namespace TaskManagerApi.Services
 
             //logger.LogInformation($"An password reset email was sent to {user.Email}");
         }
-
-
         public async Task<bool> ResetPassword(ChangePasswordModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -194,6 +186,13 @@ namespace TaskManagerApi.Services
                 }
             }
             return false;
+        }
+
+
+
+        public async Task<IEnumerable<RoleDTO>> GetRoles()
+        {
+            return _roleManager.Roles.Select(r => new RoleDTO { Id = r.Id, Name = r.Name}).ToList();
         }
     }
 }

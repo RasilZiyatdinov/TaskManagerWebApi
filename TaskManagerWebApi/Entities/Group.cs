@@ -6,8 +6,8 @@ namespace TaskManagerApi.Entities
     {
         public string Name { get; set; }
         [JsonIgnore]
-        public List<User> Students { get; set; } = new();
+        public virtual List<User> Students { get; set; } = new();
         [JsonIgnore]
-        public List<Subject> Subjects { get; set; } = new();
+        public virtual List<Subject> Subjects { get; set; } = new();
     }
 }

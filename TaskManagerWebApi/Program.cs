@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using TaskManagerApi.DAL;
 using TaskManagerApi.Entities;
-using TaskManagerApi.Services.Interfaces;
 using TaskManagerApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -13,9 +12,12 @@ using TaskManagerApi.MiddleWares;
 using TaskManagerWebApi.Services;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using TaskManagerWebApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
+
+builder.Services.AddCors();
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("ConnStr")));
@@ -51,6 +53,14 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<ITeamRoleService, TeamRoleService>();
+builder.Services.AddScoped<IRequestService, RequestService>();
+
+
+
+
 
 
 
@@ -97,6 +107,9 @@ builder.Services.AddSwaggerGen(swagger =>
 
 var app = builder.Build();
 
+app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -107,12 +120,18 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseOptions();
+app.UseRouting();
+
+
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<ErrorHandlerMiddleware>();
 
-app.MapControllers();
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 app.Run();

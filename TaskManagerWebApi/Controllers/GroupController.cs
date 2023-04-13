@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using TaskManagerApi.Entities;
 using TaskManagerApi.Models;
 using TaskManagerApi.Services;
-using TaskManagerApi.Services.Interfaces;
+using TaskManagerWebApi.Services.Interfaces;
 
 namespace TaskManagerApi.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class GroupController : ControllerBase
@@ -51,7 +54,7 @@ namespace TaskManagerApi.Controllers
             return Ok(updateResult);
         }
 
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("delete")]
         public async Task<bool> Delete(long id)
         {
             return await _groupService.DeleteGroupAsync(id);

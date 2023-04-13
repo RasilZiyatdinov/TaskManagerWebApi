@@ -1,148 +1,136 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Ocsp;
+using System.Linq;
+using System.Xml.Linq;
 using TaskManagerApi.DAL;
 using TaskManagerApi.Entities;
 using TaskManagerApi.Models;
-using TaskManagerApi.Services.Interfaces;
+using TaskManagerWebApi.Entities;
+using TaskManagerWebApi.Models;
+using TaskManagerWebApi.Models.DTO;
+using TaskManagerWebApi.Services.Interfaces;
 
 namespace TaskManagerApi.Services
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ProjectService : IProjectService
     {
         private readonly ApplicationDbContext dbContext;
         private static ILogger<ProjectService> logger;
+        private readonly UserManager<User> userManager;
 
-        public ProjectService(ApplicationDbContext _dbContext, ILogger<ProjectService> _logger)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="_dbContext"></param>
+        /// <param name="_logger"></param>
+        public ProjectService(ApplicationDbContext _dbContext, UserManager<User> _userManager, ILogger<ProjectService> _logger)
         {
             dbContext = _dbContext;
             logger = _logger;
-
+            userManager = _userManager;
         }
-        public async Task<IEnumerable<ProjectModel>> GetProjectsByTeacherAsync(int teacherId)
+
+
+        public async Task<IEnumerable<ProjectDTO>> GetProjectsByTeacherAsync(int teacherId)
         {
-            var projectList = await dbContext.Project.Include(p => p.Manager).
-                Include(p => p.Participants).
-                Include(p => p.Subject).ThenInclude(s => s.Teacher).
-                Where(x => x.Subject.TeacherId == teacherId).ToListAsync();
-            IEnumerable<ProjectModel> result = new List<ProjectModel>();
-            List<string> parts = new List<string>();
-            foreach (var item in projectList)
+            var projects = dbContext.Project.Include(p => p.Subject).ThenInclude(s => s.Teacher).ThenInclude(s => s.Group).
+            Where(x => x.Subject.TeacherId == teacherId).
+                        Select(p => new ProjectDTO()
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                            MembersNum = p.MembersNum,
+                            ExpirationDate = p.ExpirationDate,
+                            Subject = new SubjectDTO
+                            {
+                                Id = p.SubjectId,
+                                Name = p.Subject.Name,
+                                Teacher = new UserModel(p.Subject.Teacher, null)
+                            },
+                            Status = p.Status.Name,
+                            Manager = p.Manager != null ? new UserModel(p.Manager, null) : null,
+                            Requests = p.Requests.Select(r => new RequestDTO() { Status = r.Status.Name, Student = new UserModel(r.Student, null), Role = r.Role.Name }),
+                            TeamRoles = p.TeamRoles.Select(r => r.Name).ToList()
+                        });
+
+            return projects;
+        }
+
+        public async Task<IEnumerable<ProjectDTO>> GetProjectsByGroupAsync(int groupId)
+        {
+            var gr = await dbContext.Group.FirstOrDefaultAsync(x => x.Id == groupId);
+
+            var projects = from p in dbContext.Project.Include(p => p.Subject).ThenInclude(s => s.Teacher).
+            Where(x => x.Subject.Groups.Contains(gr))
+                           select new ProjectDTO()
+                           {
+                               Id = p.Id,
+                               Name = p.Name,
+                               MembersNum = p.MembersNum,
+                               ExpirationDate = p.ExpirationDate,
+                               Subject = new SubjectDTO
+                               {
+                                   Id = p.SubjectId,
+                                   Name = p.Subject.Name,
+                                   Teacher = new UserModel(p.Subject.Teacher, null)
+                               },
+                               Status = p.Status.Name,
+                               Manager = p.Manager != null ? new UserModel(p.Manager, null) : null,
+                               Requests = p.Requests.Select(r => new RequestDTO() { Status = r.Status.Name, Student = new UserModel(r.Student, null), Role = r.Role.Name }),
+                               TeamRoles = p.TeamRoles.Select(r => r.Name).ToList()
+                           };
+
+            return projects;
+        }
+
+        public async Task AddProjectAsync(ProjectModel p, UserModel user)
+        {
+            var status = await dbContext.Status.FirstOrDefaultAsync(x => x.Name == "Открыта");
+
+            Project pr = new Project
             {
-                result.Append(new ProjectModel {
-                    Id = item.Id,
-                    Name = item.Name, 
-                    MembersNum = item.MembersNum, 
-                    Subject = item.Subject.Id,
-                    Teacher = item.Subject.Teacher.Id,
-                    //Manager = item.Manager.Id,
-                    Participants = item.Participants.Select(x => x.Id).ToList()
-                });
-            }
-            return result;
-        }
-
-        public async Task<IEnumerable<ProjectModel>> GetProjectsByGroupAsync(int groupId)
-        {
-            var group = await dbContext.Group.FirstOrDefaultAsync(x => x.Id == groupId);
-            var projectList = await dbContext.Project.Where(x => x.Subject.Groups.Contains(group)).ToListAsync();
-            IEnumerable<ProjectModel> result = new List<ProjectModel>();
-            foreach (var item in projectList)
-            {
-                result.Append(new ProjectModel
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    MembersNum = item.MembersNum,
-                    Subject = item.Subject.Id,
-                    Teacher = item.Subject.Teacher.Id,
-                    Participants = item.Participants.Select(x => x.Id).ToList()
-                });
-            }
-            return result;
-        }
-
-
-        public async Task<Project> AddProjectAsync(Project p, UserModelResponse user)
-        {
-            var pr = await dbContext.Project.AddAsync(p);
+                Name = p.Name,
+                MembersNum = p.MembersNum,
+                SubjectId = p.SubjectId,
+                ExpirationDate = p.PlannedExpirationDate,
+                Status = status                
+            };
+            var project = await dbContext.Project.AddAsync(pr);
             await dbContext.SaveChangesAsync();
             logger.LogInformation("Преподаватель добавил проект \'{Name}\': {@user}", p.Name, user);
-            return pr.Entity;
         }
 
-        public async Task<Project> UpdateProjectAsync(Project p)
+        public async Task UpdateProjectAsync(ProjectModel p)
         {
-            var updateResult = dbContext.Project.Update(p);
-            await dbContext.SaveChangesAsync();
+            var pr = dbContext.Project.FirstOrDefaultAsync(x => x.Id == p.Id).Result;
+            pr.Name = p.Name;
+            pr.MembersNum = p.MembersNum;
+            pr.SubjectId = p.SubjectId;
 
-            return updateResult.Entity;
+            var updateResult = dbContext.Project.Update(pr);
+            await dbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> DeleteProjectAsync(int id, UserModelResponse user)
+        /// <summary>
+        /// Удаление проекта
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteProjectAsync(int id, UserModel user)
         {
             var pr = await dbContext.Project.FirstOrDefaultAsync(x => x.Id == id);
             var deleteResult = dbContext.Remove(pr);
             await dbContext.SaveChangesAsync();
-            logger.LogInformation("Преподаватель удалмл проект \'{Name}\': {@user}", pr.Name, user);
+            logger.LogInformation("Преподаватель удалил проект \'{Name}\': {@user}", pr.Name, user);
 
             return deleteResult != null ? true : false;
         }
-
-
-        public async Task<Project> ChooseProjectByManagerAsync(int managerId, int projectId, UserModelResponse user)
-        {
-            var project = await dbContext.Project.FirstOrDefaultAsync(x => x.Id == projectId);
-            if (project.Manager == null)
-            {
-                var manager = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == managerId);
-                project.Manager = manager;
-                await dbContext.SaveChangesAsync();
-                logger.LogInformation("Менеджер выбрал проект \'{Name}\': {@user}", project.Name, user);
-            }
-
-            return project;
-        }
-
-        public async Task<Project> ChooseProjectByStudentAsync(int studentId, int projectId, UserModelResponse user)
-        {
-            var project = await dbContext.Project.FirstOrDefaultAsync(x => x.Id == projectId);
-            if (project.Participants.Count < project.MembersNum)
-            {
-                var student = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == studentId);
-                project.Participants.Add(student);
-                await dbContext.SaveChangesAsync();
-                logger.LogInformation("Студент записался в проект \'{Name}\': {@user}", project.Name, user);
-            }
-
-            return project;
-        }
-
-
-        public async Task<Project> LeaveProjectByManagerAsync(int projectId, UserModelResponse user)
-        {
-            var project = await dbContext.Project.FirstOrDefaultAsync(x => x.Id == projectId);
-            if (project.Manager != null)
-            {
-                project.Manager = null;
-                await dbContext.SaveChangesAsync();
-                logger.LogInformation("Менеджер покинул проект \'{Name}\': {@user}", project.Name, user);
-            }
-
-            return project;
-        }
-
-        public async Task<Project> LeaveProjectByStudentAsync(int studentId, int projectId, UserModelResponse user)
-        {
-            var project = await dbContext.Project.FirstOrDefaultAsync(x => x.Id == projectId);
-            var student = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == studentId);
-
-            project.Participants.Remove(student);
-            await dbContext.SaveChangesAsync();
-            logger.LogInformation("Студент покинул проект \'{Name}\': {@user}", project.Name, user);
-
-            return project;
-        }
-
-
 
     }
 }
