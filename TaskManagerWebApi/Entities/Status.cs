@@ -1,7 +1,13 @@
-﻿namespace TaskManagerApi.Entities
+﻿namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Status : BaseEntity
     {
-        public string Name { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
     }
 }

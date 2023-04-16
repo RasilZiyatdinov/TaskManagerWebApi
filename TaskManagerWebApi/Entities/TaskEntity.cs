@@ -2,43 +2,97 @@
 using System.Text.Json.Serialization;
 using TaskManagerWebApi.Entities;
 
-namespace TaskManagerApi.Entities
+namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class TaskEntity : BaseEntity
     {
-        public string Name { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
 
         [Column(TypeName = "Date")]
         public DateTime CreationDate { get; set;}
 
+        /// <summary>
+        /// 
+        /// </summary>
+
         [Column(TypeName = "Date")]
         public DateTime ExpirationDate { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+
         [Column(TypeName = "text")]
-        public string Description { get; set;}
-        [JsonIgnore]
+        public string Description { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int PriorityId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("PriorityId")]
-        public virtual Priority Priority { get; set;}
-        [JsonIgnore]
+        public virtual Priority Priority { get; set; } = new Priority();
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int StatusId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("StatusId")]
-        public virtual Status Status { get; set; }
+        public virtual Status Status { get; set; } = new Status();
 
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
         public int ProjectId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("ProjectId")]
-        public virtual Project Project { get; set; }
+        public virtual Project Project { get; set; } = new Project();
 
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
         public int TeamRoleId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("TeamRoleId")]
-        public virtual RoleProject TeamRole { get; set; }
+        public RoleProject TeamRole { get; set; } = new RoleProject();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<User> Students { get; set; } = new List<User>();
 
-        public virtual List<User>? Students { get; set; }
-        public virtual List<StudentTask>? StudentTasks { get; set; } = new();
-        public virtual List<Comment>? Comments { get; set; } = new();
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<StudentTask> StudentTasks { get; set; } = new();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<Comment> Comments { get; set; } = new();
 
     }
 }

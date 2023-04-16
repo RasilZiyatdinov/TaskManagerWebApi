@@ -1,25 +1,45 @@
 ﻿
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using TaskManagerApi.Entities;
+using TaskManagerWebApi.Entities;
 
 namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class StudentTask
     {
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
         public int StudentId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("StudentId")]
-        public virtual User? Student { get; set; }
-        [JsonIgnore]
+        public virtual User Student { get; set; } = new User();
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int TaskId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("TaskId")]
-        public virtual TaskEntity? Task { get; set; }
+        public virtual TaskEntity Task { get; set; } = new TaskEntity();
 
-        //public int RoleId { get; set; }
-        //public virtual RoleProject? Role { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public int HoursNumber { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public DateTime? ExpirationDate { get; set; }
     }
 }

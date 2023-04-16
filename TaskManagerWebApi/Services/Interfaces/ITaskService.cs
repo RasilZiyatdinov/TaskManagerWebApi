@@ -1,22 +1,62 @@
-﻿using TaskManagerApi.Entities;
-using TaskManagerApi.Models;
-using TaskManagerWebApi.Models;
+﻿using TaskManagerWebApi.Models;
 using TaskManagerWebApi.Models.DTO;
 
 namespace TaskManagerWebApi.Services.Interfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface ITaskService
     {
-        Task<IEnumerable<TaskDTO>> GetTasksByStudentAsync(int studentId, int projectId);
-        //Task<TaskEntity> AddTaskAsync(SubjectModel subject);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="studentId"></param>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        IEnumerable<TaskDTO> GetTasksByStudentAsync(int studentId, int projectId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
         Task<bool> DeleteTaskAsync(int taskId);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         Task AddTaskAsync(TaskModel t);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         Task UpdateTaskAsync(TaskModel t);
 
-        Task<IEnumerable<TaskDTO>> GetAllTasksAsync(int projectId);
-        Task<IEnumerable<TaskDTO>> GetTasksByRoleAsync(int roleId, int projectId);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        IEnumerable<TaskDTO> GetAllTasksAsync(int projectId);
 
-        //Task<Subject> UpdateTaskAsync(SubjectModel subject);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        IEnumerable<TaskDTO> GetTasksByRoleAsync(int roleId, int projectId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        Task UpdateTaskByStudentAsync(TaskStudentModel t);
     }
 }

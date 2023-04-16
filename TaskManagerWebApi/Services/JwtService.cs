@@ -1,34 +1,48 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using TaskManagerApi.DAL;
-using TaskManagerApi.Entities;
-using TaskManagerApi.Helpers;
-using TaskManagerApi.Models;
+using TaskManagerWebApi.Entities;
+using TaskManagerWebApi.Models.DTO;
 using TaskManagerWebApi.Services.Interfaces;
 
-namespace TaskManagerApi.Services
+namespace TaskManagerWebApi.Services
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class JwtService : IJwtService
     {
         private readonly UserManager<User> userManager;
-        public JwtService(IConfiguration _configuration, UserManager<User> _userManager)
+        private readonly RoleManager<IdentityRole<int>> roleManager;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="_configuration"></param>
+        /// <param name="_userManager"></param>
+        /// <param name="_roleManager"></param>
+        public JwtService(IConfiguration _configuration, UserManager<User> _userManager, RoleManager<IdentityRole<int>> _roleManager)
         {
             userManager = _userManager;
+            roleManager = _roleManager;
         }
-        public async Task<UserModel> GetUserByToken(HttpContext HttpContext)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="HttpContext"></param>
+        /// <returns></returns>
+        public async Task<UserDTO> GetUserByToken(HttpContext HttpContext)
         {
             var claim = HttpContext.User.Claims.First(c => c.Type == "id");
             var id = claim.Value;
             claim = HttpContext.User.Claims.First(c => c.Type == ClaimTypes.Role);
-            var role = claim.Value;
+            var roleName = claim.Value;
 
-            var user = await userManager.Users.Include(x => x.Group).FirstOrDefaultAsync(x => x.Id == int.Parse(id));
+            var role = roleManager.Roles.Where(r => r.Name == roleName).First();           
+            var user = await userManager.Users.Include(x => x.Group).FirstAsync(x => x.Id == int.Parse(id));
 
-            return user != null ? new UserModel(user, role) : null;
+            return new UserDTO(user, new RoleDTO { Id = role.Id, Name = role.Name });
         }
     }
 }

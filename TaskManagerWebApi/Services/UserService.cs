@@ -1,41 +1,53 @@
-﻿using TaskManagerApi.DAL;
-using TaskManagerApi.Models;
+﻿using TaskManagerWebApi.DAL;
+using TaskManagerWebApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using TaskManager.Data;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TaskManagerApi.Entities;
-using RestSharp.Authenticators;
-using RestSharp;
-using System.Security.Policy;
+using TaskManagerWebApi.Entities;
 using TaskManagerWebApi.Services;
-using Microsoft.AspNetCore.WebUtilities;
-using TaskManagerWebApi.Models;
-using Org.BouncyCastle.Asn1.Ocsp;
-using TaskManagerApi.Helpers;
 using Microsoft.EntityFrameworkCore;
 using TaskManagerWebApi.Services.Interfaces;
 using TaskManagerWebApi.Models.DTO;
+using TaskManagerWebApi.Models.Enums;
 
-namespace TaskManagerApi.Services
+namespace TaskManagerWebApi.Services
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly IConfiguration _configuration;
 
-        private static ILogger<UserService> logger;
+        private static ILogger<UserService>? logger;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="roleManager"></param>
+        /// <param name="configuration"></param>
+        /// <param name="_logger"></param>
         public UserService(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, 
-            IConfiguration configuration, ILogger<UserService> _logger)
+            IConfiguration configuration, ILogger<UserService>? _logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            logger = _logger;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
         public async Task<AuthenticateResponse> Authenticate(LoginModel model)
         {
             var user = await _userManager.Users.Include(x => x.Group).FirstOrDefaultAsync(x => x.Email == model.Email);
@@ -70,6 +82,15 @@ namespace TaskManagerApi.Services
             var token = GetToken(authClaims);
             return new AuthenticateResponse(user, userRoles.ElementAt(0), new JwtSecurityTokenHandler().WriteToken(token));
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="request"></param>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
         public async Task<Response> Register(RegisterModel model, HttpRequest request, IUrlHelper url)
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
@@ -127,15 +148,21 @@ namespace TaskManagerApi.Services
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                    issuer: _configuration["JWT:ValidIssuer"],
+                    audience: _configuration["JWT:ValidAudience"],
+                    expires: DateTime.Now.AddHours(3),
+                    claims: authClaims,
+                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );
 
             return token;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public async Task RequestPasswordReset(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -148,6 +175,12 @@ namespace TaskManagerApi.Services
 
             //logger.LogWarning("Reset password requested for an account that did not exist.");
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public async Task RequestPasswordResetLink(User user)
         {
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -165,6 +198,12 @@ namespace TaskManagerApi.Services
 
             //logger.LogInformation($"An password reset email was sent to {user.Email}");
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         public async Task<bool> ResetPassword(ChangePasswordModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -188,9 +227,11 @@ namespace TaskManagerApi.Services
             return false;
         }
 
-
-
-        public async Task<IEnumerable<RoleDTO>> GetRoles()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<RoleDTO> GetRoles()
         {
             return _roleManager.Roles.Select(r => new RoleDTO { Id = r.Id, Name = r.Name}).ToList();
         }

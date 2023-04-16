@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using TaskManagerApi.Entities;
-using TaskManagerApi.Models;
-using TaskManagerApi.Services;
+﻿using Microsoft.AspNetCore.Mvc;
+using TaskManagerWebApi.Entities;
 using TaskManagerWebApi.Services.Interfaces;
 
-namespace TaskManagerApi.Controllers
+namespace TaskManagerWebApi.Controllers
 {
     /// <summary>
     /// 
@@ -25,6 +22,10 @@ namespace TaskManagerApi.Controllers
             _groupService = groupService;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("get")]
         public async Task<IActionResult> Get()
         {
@@ -36,6 +37,11 @@ namespace TaskManagerApi.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="g"></param>
+        /// <returns></returns>
         [HttpPost("add")]
         public async Task<IActionResult> Post(Group g)
         {
@@ -47,6 +53,11 @@ namespace TaskManagerApi.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="g"></param>
+        /// <returns></returns>
         [HttpPut("update")]
         public async Task<IActionResult> Update(Group g)
         {
@@ -54,6 +65,11 @@ namespace TaskManagerApi.Controllers
             return Ok(updateResult);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("delete")]
         public async Task<bool> Delete(long id)
         {

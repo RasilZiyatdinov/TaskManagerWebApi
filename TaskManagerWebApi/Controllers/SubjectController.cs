@@ -1,21 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TaskManagerApi.Entities;
-using TaskManagerApi.Models;
-using TaskManagerApi.Services;
+using TaskManagerWebApi.Entities;
+using TaskManagerWebApi.Models;
+using TaskManagerWebApi.Services;
+using TaskManagerWebApi.Models.DTO;
 using TaskManagerWebApi.Services.Interfaces;
 
-namespace TaskManagerApi.Controllers
+namespace TaskManagerWebApi.Controllers
 {
     //[Authorize(Roles = "Преподаватель")]
+    /// <summary>
+    /// 
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class SubjectController : ControllerBase
     {
         private readonly ISubjectService subjectService;
         private readonly IJwtService jwtService;
-        private static ILogger<SubjectController> logger;
+        private static ILogger<SubjectController>? logger;
 
         /// <summary>
         /// 
@@ -51,7 +55,7 @@ namespace TaskManagerApi.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> Post(SubjectModel subject)
         {
-            UserModel user = await jwtService.GetUserByToken(HttpContext);
+            UserDTO user = await jwtService.GetUserByToken(HttpContext);
             await subjectService.AddSubjectAsync(subject);
             return Ok();
         }
@@ -64,7 +68,7 @@ namespace TaskManagerApi.Controllers
         [HttpPut("update")]
         public async Task<IActionResult> Put(SubjectModel subject)
         {
-            UserModel user = await jwtService.GetUserByToken(HttpContext);
+            UserDTO user = await jwtService.GetUserByToken(HttpContext);
             await subjectService.UpdateSubjectAsync(subject);
             return Ok();
         }

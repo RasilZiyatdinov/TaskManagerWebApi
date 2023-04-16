@@ -1,25 +1,50 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using TaskManagerApi.Entities;
+using TaskManagerWebApi.Entities;
 
 namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Request
     {
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
         public int StudentId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("StudentId")]
-        public virtual User? Student { get; set; }
+        public User Student { get; set; } = new User();
 
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
         public int ProjectId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("ProjectId")]
-        public virtual Project? Project { get; set; }
+        public Project Project { get; set; } = new Project();
 
-        public virtual RequestStatus Status { get; set; }
-        public virtual IdentityRole<int> Role { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public RequestStatus Status { get; set; } = new RequestStatus();
 
-        public DateTime? Date { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public IdentityRole<int> Role { get; set; } = new IdentityRole<int>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DateTime Date { get; set; }
     }
 }

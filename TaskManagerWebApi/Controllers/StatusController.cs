@@ -1,7 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
-using TaskManagerApi.Services;
-using TaskManagerApi.DAL;
+using TaskManagerWebApi.Services;
+using TaskManagerWebApi.DAL;
 using Microsoft.EntityFrameworkCore;
 
 namespace TaskManagerWebApi.Controllers

@@ -6,8 +6,18 @@ using MailKit.Net.Smtp;
 
 namespace TaskManagerWebApi.Services
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class EmailService
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="subject"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public async Task SendEmailAsync(string email, string subject, string message)
         {
             var emailMessage = new MimeMessage();

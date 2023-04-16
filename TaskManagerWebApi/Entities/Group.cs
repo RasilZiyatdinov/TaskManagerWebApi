@@ -1,13 +1,25 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TaskManagerApi.Entities
+namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Group : BaseEntity
     {
-        public string Name { get; set; }
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Name { get; set; } = String.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public virtual List<User> Students { get; set; } = new();
-        [JsonIgnore]
+
+        /// <summary>
+        /// 
+        /// </summary>
         public virtual List<Subject> Subjects { get; set; } = new();
     }
 }

@@ -1,15 +1,27 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using TaskManagerApi.Entities;
+using TaskManagerWebApi.Entities;
 
 namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class RoleProject : BaseEntity
     {
-        public string Name {  get; set; }
-        public int ProjectId { get; set; }
-        [ForeignKey("ProjectId")]
-        public Project Project { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
 
-        //public virtual List<StudentTask>? StudentTasks { get; set; } = new();
+        /// <summary>
+        /// 
+        /// </summary>
+        public int ProjectId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [ForeignKey("ProjectId")]
+        public Project Project { get; set; } = new Project();
     }
 }

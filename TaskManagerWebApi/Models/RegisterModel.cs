@@ -1,19 +1,36 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TaskManager.Data
+namespace TaskManagerWebApi.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class RegisterModel
     {
-        [Required(ErrorMessage = "Name is required")]
+        /// <summary>
+        /// 
+        /// </summary>
         public string FullName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Email is required")]
+        /// <summary>
+        /// 
+        /// </summary>
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Password is required")]
+        /// <summary>
+        /// 
+        /// </summary>
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string Role { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int? GroupId { get; set; }
     }
 }

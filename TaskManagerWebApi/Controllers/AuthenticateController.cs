@@ -8,15 +8,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using TaskManager.Data;
-using TaskManagerApi.DAL;
-using TaskManagerApi.Entities;
-using TaskManagerApi.Models;
-using TaskManagerApi.Services;
+using TaskManagerWebApi.DAL;
+using TaskManagerWebApi.Entities;
 using TaskManagerWebApi.Models;
 using TaskManagerWebApi.Services.Interfaces;
 
-namespace TaskManager.Controllers
+namespace TaskManagerWebApi.Controllers
 {
     /// <summary>
     /// Авторизация и аутентификация
@@ -154,8 +151,12 @@ namespace TaskManager.Controllers
             return user == null ? NotFound() : Ok(user);
         }
 
+        /// <summary>
+        /// Получить роли в системе (преподаватель, студент, менеджер)
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("getroles")]
-        public async Task<IActionResult> GetRoles()
+        public IActionResult GetRoles()
         {
             return Ok(_userService.GetRoles());
         }

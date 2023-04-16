@@ -1,14 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 
-namespace TaskManager.Data
+namespace TaskManagerWebApi.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class LoginModel
     {
-        [Required(ErrorMessage = "Email is required")]
+        /// <summary>
+        /// 
+        /// </summary>
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Password is required")]
+        /// <summary>
+        /// 
+        /// </summary>
         public string Password { get; set; } = string.Empty;
     }
 }

@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Data;
-using TaskManagerApi.Models;
-using TaskManagerApi.Services;
-using TaskManagerWebApi.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using TaskManagerWebApi.Services.Interfaces;
 
 namespace TaskManagerWebApi.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     //[Authorize(Roles = "Менеджер")]
     [Route("[controller]")]
     [ApiController]
@@ -24,18 +22,14 @@ namespace TaskManagerWebApi.Controllers
             _teamRoleService = teamRoleService;
         }
 
-        /// <summary>
-        /// Получить все роли
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("get")]
-        public async Task<IActionResult> Get()
-        {
-            var response = await _teamRoleService.GetTeamRolesAsync();
-            if (response == null)
-                return BadRequest(new { message = "Error" });
-            return Ok(response);
-        }
+        //[HttpGet("get")]
+        //public async Task<IActionResult> Get()
+        //{
+        //    var response = await _teamRoleService.GetTeamRolesAsync();
+        //    if (response == null)
+        //        return BadRequest(new { message = "Error" });
+        //    return Ok(response);
+        //}
 
         /// <summary>
         /// Получить роли в проекте
@@ -56,7 +50,7 @@ namespace TaskManagerWebApi.Controllers
         /// Добавить роль в проект (разработчик, аналитик и тд) - "Менеджер"
         /// </summary>
         /// <param name="projectId"></param>
-        /// <param name="roleId"></param>
+        /// <param name="roleName"></param>
         /// <returns></returns>
         [HttpPost("addroletoproject")]
         public async Task<IActionResult> AddRoleToProject(int projectId, string roleName)
@@ -69,7 +63,7 @@ namespace TaskManagerWebApi.Controllers
         /// Удалить роль из проекта - "Менеджер"
         /// </summary>
         /// <param name="projectId"></param>
-        /// <param name="roleId"></param>
+        /// <param name="roleName"></param>
         /// <returns></returns>
         [HttpDelete("deleterolefromproject")]
         public async Task<IActionResult> DeleteRoleFromProject(int projectId, string roleName)

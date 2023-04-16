@@ -1,4 +1,4 @@
-﻿using TaskManagerApi.Entities;
+﻿using TaskManagerWebApi.Entities;
 
 namespace TaskManagerWebApi.Services.Interfaces
 {

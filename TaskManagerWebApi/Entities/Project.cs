@@ -4,35 +4,81 @@ using System.ComponentModel;
 using TaskManagerWebApi.Entities;
 using Castle.Components.DictionaryAdapter;
 
-namespace TaskManagerApi.Entities
+namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Project: BaseEntity
     {
-        public string Name { get; set; }
-        public int MembersNum { get; set; }
-        [JsonIgnore]
-        public int SubjectId { get; set; }
-        [ForeignKey("SubjectId")]
-        public virtual Subject? Subject { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Name { get; set; } = String.Empty;
 
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
+        public int MembersNum { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int SubjectId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [ForeignKey("SubjectId")]
+        public Subject Subject { get; set; } = new Subject();
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int StatusId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("StatusId")]
-        public virtual Status Status { get; set; }
+        public Status Status { get; set; } = new Status();
+
+        /// <summary>
+        /// 
+        /// </summary>
         [Column(TypeName = "Date")]
         public DateTime ExpirationDate { get; set; }
 
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
         public int? ManagerId { get; set; }
-        [ForeignKey("ManagerId")]
-        public virtual User? Manager { get; set; }
-        //public virtual List<TeamRole>? TeamRoles { get; set; } = new();
-        public virtual List<RoleProject>? TeamRoles { get; set; } = new();
 
-        [JsonIgnore]
-        public virtual List<User> RequestedParticipants { get; set; } = new();
-        public virtual List<Request>? Requests { get; set; } = new();
-        public virtual List<Mark>? Marks { get; set; } = new();
+        /// <summary>
+        /// 
+        /// </summary>
+        [ForeignKey("ManagerId")]
+        public User? Manager { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<RoleProject> TeamRoles { get; set; } = new();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<User> RequestedParticipants { get; set; } = new();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<Request> Requests { get; set; } = new();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<Mark> Marks { get; set; } = new();
 
     }
 }

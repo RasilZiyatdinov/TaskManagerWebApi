@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using TaskManagerApi.Entities;
-using TaskManagerApi.Services;
+﻿using Microsoft.AspNetCore.Mvc;
 using TaskManagerWebApi.Models;
 using TaskManagerWebApi.Services.Interfaces;
 
-namespace TaskManagerApi.Controllers
+namespace TaskManagerWebApi.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class TaskController : ControllerBase
@@ -39,7 +39,7 @@ namespace TaskManagerApi.Controllers
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        [HttpPut("update")]
+        [HttpPut("updatebymanager")]
         public async Task<IActionResult> Update(TaskModel t)
         {
             await _taskService.UpdateTaskAsync(t);
@@ -64,9 +64,9 @@ namespace TaskManagerApi.Controllers
         /// <param name="projectId"></param>
         /// <returns></returns>
         [HttpGet("getbyproject")]
-        public async Task<IActionResult> GetAllTasks(int projectId)
+        public IActionResult GetAllTasks(int projectId)
         {
-            var response = await _taskService.GetAllTasksAsync(projectId);
+            var response =  _taskService.GetAllTasksAsync(projectId);
             return Ok(response);
         }
 
@@ -77,9 +77,9 @@ namespace TaskManagerApi.Controllers
         /// <param name="projectId"></param>
         /// <returns></returns>
         [HttpGet("getbyrole")]
-        public async Task<IActionResult> GetTasksByRole(int roleId, int projectId)
+        public IActionResult GetTasksByRole(int roleId, int projectId)
         {
-            var response = await _taskService.GetTasksByRoleAsync(roleId, projectId);
+            var response =  _taskService.GetTasksByRoleAsync(roleId, projectId);
             return Ok(response);
         }
 
@@ -90,11 +90,22 @@ namespace TaskManagerApi.Controllers
         /// <param name="projectId"></param>
         /// <returns></returns>
         [HttpGet("getbystudent")]
-        public async Task<IActionResult> GetTasksByStudent(int studentId, int projectId)
+        public IActionResult GetTasksByStudent(int studentId, int projectId)
         {
-            var response = await _taskService.GetTasksByStudentAsync(studentId, projectId);
+            var response = _taskService.GetTasksByStudentAsync(studentId, projectId);
             return Ok(response);
         }
 
+        /// <summary>
+        /// Обновить задачу (занести время) - "Студент"
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        [HttpPut("updatebystudent")]
+        public async Task<IActionResult> UpdateTaskByStudent(TaskStudentModel t)
+        {
+            await _taskService.UpdateTaskByStudentAsync(t);
+            return Ok();
+        }
     }
 }

@@ -7,26 +7,26 @@ namespace TaskManagerWebApi.Models
     /// <summary>
     /// 
     /// </summary>
-    public class SubjectModel
+    public class TaskStudentModel
     {
         /// <summary>
         /// 
         /// </summary>
-        public int Id { get; set; }
+        public int StudentId { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string Name { get; set; } = string.Empty;
+        public int TaskId { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public int TeacherId { get; set; }
+        public int AddHoursNumber { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public List<int> GroupsIds { get; set; } = new();
+        public DateTime? ExpirationDate { get; set; }
     }
 }

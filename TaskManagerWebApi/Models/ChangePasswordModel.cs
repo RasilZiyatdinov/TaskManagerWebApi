@@ -1,10 +1,24 @@
 ﻿namespace TaskManagerWebApi.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ChangePasswordModel
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Token { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Email { get; set; } = String.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Password { get; set; } = String.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Token { get; set; } = String.Empty;
 
     }
 }

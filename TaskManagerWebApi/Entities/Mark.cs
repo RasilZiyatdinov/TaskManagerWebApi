@@ -1,25 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using TaskManagerApi.Entities;
+using TaskManagerWebApi.Entities;
 
 namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Mark
     {
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
         public int UserId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("UserId")]
-        public virtual User? User { get; set; }
+        public User? User { get; set; }
 
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
         public int ProjectId { get; set; }
-        [ForeignKey("ProjectId")]
-        public virtual Project? Project { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        [ForeignKey("ProjectId")]
+        public Project? Project { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [Column(TypeName = "Date")]
         public DateTime Date { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int Grade { get; set; }
     }
 }

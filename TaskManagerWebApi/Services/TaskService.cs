@@ -1,18 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
-using TaskManagerApi.DAL;
-using TaskManagerApi.Entities;
-using TaskManagerApi.Models;
+using TaskManagerWebApi.DAL;
+using TaskManagerWebApi.Entities;
 using TaskManagerWebApi.Models;
 using TaskManagerWebApi.Models.DTO;
 using TaskManagerWebApi.Services.Interfaces;
 
-namespace TaskManagerApi.Services
+namespace TaskManagerWebApi.Services
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class TaskService : ITaskService
     {
         private readonly ApplicationDbContext dbContext;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="_dbContext"></param>
         public TaskService(ApplicationDbContext _dbContext)
         {
             dbContext = _dbContext;
@@ -25,7 +30,7 @@ namespace TaskManagerApi.Services
         /// <returns></returns>
         public async Task<bool> DeleteTaskAsync(int taskId)
         {
-            var task = await dbContext.Task.FirstOrDefaultAsync(x => x.Id == taskId);
+            var task = await dbContext.Task.FirstAsync(x => x.Id == taskId);
             var deleteResult = dbContext.Remove(task);
             await dbContext.SaveChangesAsync();
             return deleteResult != null ? true : false;
@@ -55,9 +60,14 @@ namespace TaskManagerApi.Services
             await dbContext.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public async Task UpdateTaskAsync(TaskModel t)
         {
-            var updatedTask = await dbContext.Task.FirstOrDefaultAsync(t => t.Id == t.Id);
+            var updatedTask = await dbContext.Task.FirstAsync(t => t.Id == t.Id);
             var students = await dbContext.Users.Where(x => t.StudentIds.Contains(x.Id)).ToListAsync();
 
             updatedTask.Name = t.Name;
@@ -75,7 +85,13 @@ namespace TaskManagerApi.Services
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<TaskDTO>> GetTasksByStudentAsync(int studentId, int projectId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="studentId"></param>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        public IEnumerable<TaskDTO> GetTasksByStudentAsync(int studentId, int projectId)
         {
             var tasks = dbContext.Task.
                 Where(x => x.ProjectId == projectId && x.Students.Select(x => x.Id).Contains(studentId)).
@@ -94,7 +110,12 @@ namespace TaskManagerApi.Services
             return tasks;
         }
 
-        public async Task<IEnumerable<TaskDTO>> GetAllTasksAsync(int projectId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        public IEnumerable<TaskDTO> GetAllTasksAsync(int projectId)
         {
             var tasks = dbContext.Task.
                 Where(x => x.ProjectId == projectId).
@@ -108,12 +129,19 @@ namespace TaskManagerApi.Services
                         Priority = t.Priority,
                         ProjectId = t.ProjectId,
                         TeamRole = t.TeamRole.Name,
-                        Students = t.Students.Select(s => new UserModel(s, null))
+                        Students = t.Students.Select(s => new UserDTO(s, 
+                            dbContext.Roles.Select(r => new RoleDTO { Id = r.Id, Name = r.Name }).First())).ToList()
                     });
             return tasks;
         }
 
-        public async Task<IEnumerable<TaskDTO>> GetTasksByRoleAsync(int roleId, int projectId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        public IEnumerable<TaskDTO> GetTasksByRoleAsync(int roleId, int projectId)
         {
             var tasks = dbContext.Task.
                 Where(x => x.ProjectId == projectId && x.TeamRoleId == roleId).
@@ -127,9 +155,27 @@ namespace TaskManagerApi.Services
                         Priority = t.Priority,
                         ProjectId = t.ProjectId,
                         TeamRole = t.TeamRole.Name,
-                        Students = t.Students.Select(s => new UserModel(s, null))
+                        Students = t.Students.Select(s => new UserDTO(s, 
+                            dbContext.Roles.Select(r => new RoleDTO { Id = r.Id, Name = r.Name }).First())).ToList()
                     });
             return tasks;
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public async Task UpdateTaskByStudentAsync(TaskStudentModel t)
+        {
+            var studentTask = await dbContext.StudentTask.FirstAsync(x => x.StudentId == t.StudentId && x.TaskId == t.TaskId);
+            studentTask.HoursNumber += t.AddHoursNumber;
+            studentTask.ExpirationDate = t.ExpirationDate;
+
+            var result = dbContext.StudentTask.Update(studentTask);
+            await dbContext.SaveChangesAsync();
+        }
+
     }
 }

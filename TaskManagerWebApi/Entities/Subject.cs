@@ -1,17 +1,32 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace TaskManagerApi.Entities
+namespace TaskManagerWebApi.Entities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Subject : BaseEntity
     {
-        public string Name { get; set; }
-        [JsonIgnore]
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int TeacherId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         [ForeignKey("TeacherId")]
-        //[JsonIgnore]
-        public virtual User Teacher { get; set; }
-        //[JsonIgnore]
-        public virtual List<Group> Groups { get; set; } = new();
+        public User Teacher { get; set; } = new User();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<Group> Groups { get; set; } = new();
     }
 }

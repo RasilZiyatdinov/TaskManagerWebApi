@@ -1,25 +1,57 @@
-﻿using TaskManagerApi.Entities;
-using TaskManagerApi.Models;
+﻿using TaskManagerWebApi.Entities;
+using TaskManagerWebApi.Models;
 
 namespace TaskManagerWebApi.Models.DTO
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ProjectDTO
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public int Id { get; set; }
-        public string Name { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int MembersNum { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public DateTime ExpirationDate { get; set; }
 
-        public SubjectDTO Subject { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public SubjectDTO Subject { get; set; } = new SubjectDTO();
 
-        public string Status { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public Status Status { get; set; } = new Status();
 
-        public UserModel Manager { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public UserDTO? Manager { get; set; }
 
-        public IEnumerable<RequestDTO> Requests { get; set; } 
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<RequestDTO>? Requests { get; set; } 
 
-        public List<string> TeamRoles { get; set; } = new();
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<RoleDTO>? TeamRoles { get; set; }
 
     }
 }

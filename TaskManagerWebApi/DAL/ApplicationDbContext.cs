@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
-using TaskManagerApi.Entities;
-using TaskManagerApi.Helpers;
 using TaskManagerWebApi.Entities;
+using TaskManagerWebApi.Models.Enums;
 
-namespace TaskManagerApi.DAL
+namespace TaskManagerWebApi.DAL
 {
     /// <summary>
     /// 
@@ -269,14 +268,14 @@ namespace TaskManagerApi.DAL
         /// </summary>
         public DbSet<StudentTask> StudentTask { get; set; } = null!;
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<Mark> Mark { get; set; } = null!;
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<Comment> Comment { get; set; } = null!;
-
-
-
-
     }
 }
